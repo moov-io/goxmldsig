@@ -55,6 +55,12 @@ func TestXmldocC14N11(t *testing.T) {
 	runCanonicalizationTest(t, MakeC14N11Canonicalizer(), xmldoc, xmldocC14N11Canonicalized)
 }
 
+func TestNestedExcC14N11(t *testing.T) {
+	input := `<X xmlns:x="x" xmlns:y="y"><Y xmlns:x="x" xmlns:y="y" xmlns:z="z"/></X>`
+	expected := `<X xmlns:x="x" xmlns:y="y"><Y xmlns:z="z"></Y></X>`
+	runCanonicalizationTest(t, MakeC14N11Canonicalizer(), input, expected)
+}
+
 func TestExcC14nDefaultNamespace(t *testing.T) {
 	input := `<foo:Foo xmlns="urn:baz" xmlns:foo="urn:foo"><foo:Bar></foo:Bar></foo:Foo>`
 	expected := `<foo:Foo xmlns:foo="urn:foo"><foo:Bar></foo:Bar></foo:Foo>`

@@ -167,19 +167,21 @@ func canonicalPrep(el *etree.Element, seenSoFar map[string]struct{}, strip bool,
 
 	ne := el.Copy()
 	sort.Sort(etreeutils.SortedAttrs(ne.Attr))
-	if len(ne.Attr) != 0 {
-		for _, attr := range ne.Attr {
-			if attr.Space != nsSpace {
-				continue
-			}
-			key := attr.Space + ":" + attr.Key
-			if _, seen := _seenSoFar[key]; seen {
-				ne.RemoveAttr(attr.Space + ":" + attr.Key)
-			} else {
-				_seenSoFar[key] = struct{}{}
-			}
+	n := 0
+	for _, attr := range ne.Attr {
+		if attr.Space != nsSpace {
+			ne.Attr[n] = attr
+			n++
+			continue
+		}
+		key := attr.Space + ":" + attr.Key
+		if _, seen := _seenSoFar[key]; !seen {
+			ne.Attr[n] = attr
+			n++
+			_seenSoFar[key] = struct{}{}
 		}
 	}
+	ne.Attr = ne.Attr[:n]
 
 	if !comments {
 		c := 0
