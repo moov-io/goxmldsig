@@ -126,3 +126,16 @@ func TestSignNonDefaultID(t *testing.T) {
 	refURI := ref.SelectAttrValue("URI", "")
 	require.Equal(t, refURI, "#"+id)
 }
+
+func TestBahSign(t *testing.T) {
+	var messageBuf = `<Message xmlns="urn:tch" xmlns:head="urn:iso:std:iso:20022:tech:xsd:head.001.001.01" xmlns:ps="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10"><AppHdr><head:Fr><head:FIId><head:FinInstnId><head:ClrSysMmbId><head:MmbId>990000001S1</head:MmbId></head:ClrSysMmbId></head:FinInstnId></head:FIId></head:Fr><head:To><head:FIId><head:FinInstnId><head:ClrSysMmbId><head:MmbId>000000020C1</head:MmbId></head:ClrSysMmbId></head:FinInstnId></head:FIId></head:To><head:BizMsgIdr>B20190814990000001S1H00400000328351</head:BizMsgIdr><head:MsgDefIdr>pacs.002.001.10</head:MsgDefIdr><head:CreDt>2019-08-14T13:15:31</head:CreDt><head:Sgntr/></AppHdr><MessageStatusReport><ps:FIToFIPmtStsRpt xmlns:ps="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10"><ps:GrpHdr><ps:MsgId>M2019081400000000021B00000000395464</ps:MsgId><ps:CreDtTm>2019-08-14T13:16:04</ps:CreDtTm></ps:GrpHdr><ps:OrgnlGrpInfAndSts><ps:OrgnlMsgId>M20190814000000020C1B00000000395439</ps:OrgnlMsgId><ps:OrgnlMsgNmId>pain.013.001.07</ps:OrgnlMsgNmId><ps:OrgnlCreDtTm>2019-08-14T13:15:31</ps:OrgnlCreDtTm><ps:OrgnlNbOfTxs>1</ps:OrgnlNbOfTxs></ps:OrgnlGrpInfAndSts></ps:FIToFIPmtStsRpt></MessageStatusReport></Message>`
+	randomKeyStore := RandomKeyStoreForTest()
+	ctx := NewDefaultSigningContext(randomKeyStore)
+
+	messageDoc := etree.NewDocument()
+	err := messageDoc.ReadFromBytes([]byte(messageBuf))
+	require.NoError(t, err)
+
+	_, err = ctx.BahSignEnveloped(messageDoc.Root(), "UNIQUE_KEYINFO_ID")
+	require.NoError(t, err)
+}

@@ -21,7 +21,7 @@ var (
 	// ErrMissingSignature indicates that no enveloped signature was found referencing
 	// the top level element passed for signature verification.
 	ErrMissingSignature = errors.New("Missing signature referencing the top-level element")
-	ErrInvalidSignature = errors.New( "Invalid Signature")
+	ErrInvalidSignature = errors.New("Invalid Signature")
 )
 
 type ValidationContext struct {

@@ -97,7 +97,6 @@ func (ctx *SigningContext) constructSignedInfo(el *etree.Element, enveloped bool
 		reference.CreateAttr(URIAttr, "#"+dataId)
 	}
 
-
 	// /SignedInfo/Reference/Transforms
 	transforms := ctx.createNamespacedElement(reference, TransformsTag)
 	if enveloped {
