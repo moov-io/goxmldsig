@@ -23,6 +23,8 @@ const (
 	X509DataTag               = "X509Data"
 	X509CertificateTag        = "X509Certificate"
 	InclusiveNamespacesTag    = "InclusiveNamespaces"
+	ApplicationHeaderTag      = "AppHdr"
+	ApplicationHeaderSgntrTag = "Sgntr"
 )
 
 const (
