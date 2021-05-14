@@ -405,6 +405,7 @@ func TestValidateWithBahSignEnveloped(t *testing.T) {
 	}
 	vc := NewDefaultValidationContext(&certStore)
 
-	_, err = vc.BahValidate(doc.Root())
+	_, trusted, err := vc.BahValidate(doc.Root())
 	require.NoError(t, err)
+	require.Equal(t, false, trusted)
 }
