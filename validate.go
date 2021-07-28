@@ -421,6 +421,36 @@ func (ctx *ValidationContext) findSignature(root *etree.Element) (*types.Signatu
 	return sig, nil
 }
 
+func (ctx *ValidationContext) findCertificateWithX509Data(data types.X509Data) (*x509.Certificate, error) {
+
+	roots, err := ctx.CertificateStore.Certificates()
+	if err != nil {
+		return nil, err
+	}
+
+	if data.X509IssuerSerial.X509IssuerName != "" && data.X509IssuerSerial.X509SerialNumber.String() != "" {
+		for _, cert := range roots {
+			if cert.SerialNumber == nil {
+				continue
+			}
+			serial := *cert.SerialNumber
+			if cert.Issuer.String() == data.X509IssuerSerial.X509IssuerName && serial.String() == data.X509IssuerSerial.X509SerialNumber.String() {
+				return cert, nil
+			}
+		}
+	}
+
+	if data.X509SubjectName != "" {
+		for _, cert := range roots {
+			if cert.Subject.String() == data.X509SubjectName {
+				return cert, nil
+			}
+		}
+	}
+
+	return nil, errors.New("Unable to find cert with X509Data")
+}
+
 func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Certificate, error) {
 	now := ctx.Clock.Now()
 
@@ -433,20 +463,25 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 
 	if sig.KeyInfo != nil {
 		// If the Signature includes KeyInfo, extract the certificate from there
-		if len(sig.KeyInfo.X509Data.X509Certificates) == 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data == "" {
+		if len(sig.KeyInfo.X509Data.X509Certificates) > 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data != "" {
+			certData, err := base64.StdEncoding.DecodeString(
+				whiteSpace.ReplaceAllString(sig.KeyInfo.X509Data.X509Certificates[0].Data, ""))
+			if err != nil {
+				return nil, errors.New("Failed to parse certificate")
+			}
+
+			cert, err = x509.ParseCertificate(certData)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			cert, err = ctx.findCertificateWithX509Data(sig.KeyInfo.X509Data)
+		}
+
+		if cert == nil {
 			return nil, errors.New("missing X509Certificate within KeyInfo")
 		}
 
-		certData, err := base64.StdEncoding.DecodeString(
-			whiteSpace.ReplaceAllString(sig.KeyInfo.X509Data.X509Certificates[0].Data, ""))
-		if err != nil {
-			return nil, errors.New("Failed to parse certificate")
-		}
-
-		cert, err = x509.ParseCertificate(certData)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		// If the Signature doesn't have KeyInfo, Use the root certificate if there is only one
 		if len(roots) == 1 {
