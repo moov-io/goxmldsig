@@ -67,11 +67,11 @@ type KeyInfo struct {
 type X509Data struct {
 	XMLName          xml.Name          `xml:"http://www.w3.org/2000/09/xmldsig# X509Data"`
 	X509Certificates []X509Certificate `xml:"X509Certificate"`
-	X509SubjectName  string            `xml:"X509SubjectName, omitempty"`
+	X509SubjectName  string            `xml:"X509SubjectName,omitempty"`
 	X509IssuerSerial struct {
-		X509IssuerName   string  `xml:"X509IssuerName, omitempty"`
-		X509SerialNumber big.Int `xml:"X509SerialNumber, omitempty"`
-	} `xml:"X509IssuerSerial"`
+		X509IssuerName   string  `xml:"X509IssuerName,omitempty"`
+		X509SerialNumber big.Int `xml:"X509SerialNumber,omitempty"`
+	} `xml:"X509IssuerSerial,omitempty"`
 }
 
 type X509Certificate struct {

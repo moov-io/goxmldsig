@@ -31,20 +31,26 @@ func (ctx *ValidationContext) verifyUntrustedCertificate(sig *types.Signature) (
 
 	if sig.KeyInfo != nil {
 		// If the Signature includes KeyInfo, extract the certificate from there
-		if len(sig.KeyInfo.X509Data.X509Certificates) == 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data == "" {
-			return nil, errors.New("missing X509Certificate within KeyInfo")
+		if len(sig.KeyInfo.X509Data.X509Certificates) > 0 && sig.KeyInfo.X509Data.X509Certificates[0].Data != "" {
+			certData, err := base64.StdEncoding.DecodeString(
+				whiteSpace.ReplaceAllString(sig.KeyInfo.X509Data.X509Certificates[0].Data, ""))
+			if err != nil {
+				return nil, errors.New("Failed to parse certificate")
+			}
+
+			cert, err = x509.ParseCertificate(certData)
+		} else {
+			cert, err = ctx.findCertificateWithX509Data(sig.KeyInfo.X509Data)
 		}
 
-		certData, err := base64.StdEncoding.DecodeString(
-			whiteSpace.ReplaceAllString(sig.KeyInfo.X509Data.X509Certificates[0].Data, ""))
-		if err != nil {
-			return nil, errors.New("Failed to parse certificate")
-		}
-
-		cert, err = x509.ParseCertificate(certData)
 		if err != nil {
 			return nil, err
 		}
+
+		if cert == nil {
+			return nil, errors.New("missing X509Certificate within KeyInfo")
+		}
+
 	} else {
 		// If the Signature doesn't have KeyInfo, Use the root certificate if there is only one
 		if len(roots) == 1 {

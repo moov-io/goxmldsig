@@ -463,7 +463,7 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 
 	if sig.KeyInfo != nil {
 		// If the Signature includes KeyInfo, extract the certificate from there
-		if len(sig.KeyInfo.X509Data.X509Certificates) > 0 || sig.KeyInfo.X509Data.X509Certificates[0].Data != "" {
+		if len(sig.KeyInfo.X509Data.X509Certificates) > 0 && sig.KeyInfo.X509Data.X509Certificates[0].Data != "" {
 			certData, err := base64.StdEncoding.DecodeString(
 				whiteSpace.ReplaceAllString(sig.KeyInfo.X509Data.X509Certificates[0].Data, ""))
 			if err != nil {
@@ -471,11 +471,12 @@ func (ctx *ValidationContext) verifyCertificate(sig *types.Signature) (*x509.Cer
 			}
 
 			cert, err = x509.ParseCertificate(certData)
-			if err != nil {
-				return nil, err
-			}
 		} else {
 			cert, err = ctx.findCertificateWithX509Data(sig.KeyInfo.X509Data)
+		}
+
+		if err != nil {
+			return nil, err
 		}
 
 		if cert == nil {
