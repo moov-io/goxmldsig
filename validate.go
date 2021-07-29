@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/beevik/etree"
 	"github.com/russellhaering/goxmldsig/etreeutils"
@@ -70,7 +72,7 @@ func mapPathToElement(tree, el *etree.Element) []int {
 	for i, child := range tree.Child {
 		if childElement, ok := child.(*etree.Element); ok {
 			childPath := mapPathToElement(childElement, el)
-			if childElement != nil {
+			if childElement != nil && len(childPath) > 0 {
 				return append([]int{i}, childPath...)
 			}
 		}
@@ -421,6 +423,47 @@ func (ctx *ValidationContext) findSignature(root *etree.Element) (*types.Signatu
 	return sig, nil
 }
 
+func parseDN(dn string) *pkix.Name {
+	name := pkix.Name{}
+
+	dns := strings.Split(dn, ",")
+
+	var matches [][]string
+	for _, subDn := range dns {
+		matches = append(matches, strings.Split(subDn, "="))
+	}
+
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+
+		val := match[1]
+		if val == "" {
+			continue
+		}
+
+		switch strings.TrimSpace(match[0]) {
+		case "C":
+			name.Country = append(name.Country, val)
+		case "O":
+			name.Organization = append(name.Organization, val)
+		case "OU":
+			name.OrganizationalUnit = append(name.OrganizationalUnit, val)
+		case "L":
+			name.Locality = append(name.Locality, val)
+		case "ST":
+			name.Province = append(name.Province, val)
+		case "SN":
+			name.SerialNumber = val
+		case "CN":
+			name.CommonName = val
+		}
+	}
+
+	return &name
+}
+
 func (ctx *ValidationContext) findCertificateWithX509Data(data types.X509Data) (*x509.Certificate, error) {
 
 	roots, err := ctx.CertificateStore.Certificates()
@@ -428,21 +471,33 @@ func (ctx *ValidationContext) findCertificateWithX509Data(data types.X509Data) (
 		return nil, err
 	}
 
-	if data.X509IssuerSerial.X509IssuerName != "" && data.X509IssuerSerial.X509SerialNumber.String() != "" {
+	if data.X509SubjectName != "" {
+		name := parseDN(data.X509SubjectName)
 		for _, cert := range roots {
-			if cert.SerialNumber == nil {
-				continue
-			}
-			serial := *cert.SerialNumber
-			if cert.Issuer.String() == data.X509IssuerSerial.X509IssuerName && serial.String() == data.X509IssuerSerial.X509SerialNumber.String() {
+			if cert.Subject.String() == name.String() {
 				return cert, nil
 			}
 		}
 	}
 
-	if data.X509SubjectName != "" {
-		for _, cert := range roots {
-			if cert.Subject.String() == data.X509SubjectName {
+	issuer := parseDN(data.X509SubjectName)
+	for _, cert := range roots {
+		issueMatch := false
+		if cert.Issuer.String() == issuer.String() {
+			issueMatch = true
+		}
+
+		serialMatch := false
+		if cert.SerialNumber != nil && cert.SerialNumber.String() == data.X509IssuerSerial.X509SerialNumber.String() {
+			serialMatch = true
+		}
+
+		if data.X509IssuerSerial.X509IssuerName != "" && data.X509IssuerSerial.X509SerialNumber.String() != "" {
+			if issueMatch && serialMatch {
+				return cert, nil
+			}
+		} else if data.X509IssuerSerial.X509IssuerName != "" {
+			if issueMatch {
 				return cert, nil
 			}
 		}
