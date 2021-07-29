@@ -164,6 +164,7 @@ func (ctx *SigningContext) BahChecking(el *etree.Element) (*etree.Element, *etre
 }
 
 // Singing the ISO 20022 Business Application Header
+/*
 func (ctx *SigningContext) BahSignEnveloped(el *etree.Element, uniqueDataId string) (*etree.Element, error) {
 
 	// creating key info
@@ -219,6 +220,46 @@ func (ctx *SigningContext) BahSignEnveloped(el *etree.Element, uniqueDataId stri
 	} else {
 		sgntr.Child = []etree.Token{}
 		sgntr.Child = append(sgntr.Child, signature)
+	}
+
+	return ret, nil
+}
+*/
+
+func (ctx *SigningContext) BahSignEnveloped(el *etree.Element, uniqueDataId string) (*etree.Element, error) {
+
+	// setting header sgntr tag
+	head := el.FindElement(ApplicationHeaderTag)
+	sgntr := head.FindElement(ApplicationHeaderSgntrTag)
+	if sgntr == nil {
+		sgntr = &etree.Element{
+			Tag:   ApplicationHeaderSgntrTag,
+			Space: "head",
+		}
+		head.Child = append(head.Child, sgntr)
+	}
+
+	sig, err := ctx.ConstructSignature(el, true)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := el.Copy()
+
+	//ret.Child = append(ret.Child, sig)
+	head = ret.FindElement(ApplicationHeaderTag)
+	sgntr = head.FindElement(ApplicationHeaderSgntrTag)
+
+	if sgntr == nil {
+		sgntr = &etree.Element{
+			Tag:   "head:" + ApplicationHeaderSgntrTag,
+			Space: head.Space,
+		}
+		sgntr.Child = append(sgntr.Child, sig)
+		head.Child = append(head.Child, sgntr)
+	} else {
+		sgntr.Child = []etree.Token{}
+		sgntr.Child = append(sgntr.Child, sig)
 	}
 
 	return ret, nil
