@@ -493,11 +493,11 @@ func (ctx *ValidationContext) findCertificateWithX509Data(data types.X509Data) (
 			serialMatch = true
 		}
 
-		if data.X509IssuerSerial.X509IssuerName != "" && data.X509IssuerSerial.X509SerialNumber.String() != "" {
+		if cert.SerialNumber.String() != "" && issuer.String() != "" {
 			if issueMatch && serialMatch {
 				return cert, nil
 			}
-		} else if data.X509IssuerSerial.X509IssuerName != "" {
+		} else if issuer.String() != "" {
 			if issueMatch {
 				return cert, nil
 			}
