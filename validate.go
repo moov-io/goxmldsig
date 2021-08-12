@@ -474,7 +474,8 @@ func (ctx *ValidationContext) findCertificateWithX509Data(data types.X509Data) (
 	if data.X509SubjectName != "" {
 		name := parseDN(data.X509SubjectName)
 		for _, cert := range roots {
-			if cert.Subject.String() == name.String() {
+			subject := parseDN(cert.Subject.String()).String()
+			if subject == name.String() {
 				return cert, nil
 			}
 		}
