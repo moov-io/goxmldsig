@@ -206,7 +206,7 @@ func (ctx *ValidationContext) BahValidate(el *etree.Element) (*etree.Element, bo
 
 	return elm, trusted, err
 }
- */
+*/
 
 func (ctx *ValidationContext) BahValidate(el *etree.Element) (*etree.Element, bool, error) {
 
@@ -230,6 +230,6 @@ func (ctx *ValidationContext) BahValidate(el *etree.Element) (*etree.Element, bo
 		trusted = true
 	}
 
-	elm, err :=  ctx.validateSignature(el, sig, cert)
+	elm, err := ctx.validateSignature(el, sig, cert)
 	return elm, trusted, err
 }
