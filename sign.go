@@ -33,6 +33,16 @@ func NewDefaultSigningContext(ks X509KeyStore) *SigningContext {
 	}
 }
 
+func NewRtpSigningContext(ks X509KeyStore) *SigningContext {
+	return &SigningContext{
+		Hash:          crypto.SHA256,
+		KeyStore:      ks,
+		IdAttribute:   DefaultIdAttr,
+		Prefix:        DefaultPrefix,
+		Canonicalizer: MakeC14N10RecCanonicalizer(),
+	}
+}
+
 func (ctx *SigningContext) SetSignatureMethod(algorithmID string) error {
 	hash, ok := signatureMethodsByIdentifier[algorithmID]
 	if !ok {
