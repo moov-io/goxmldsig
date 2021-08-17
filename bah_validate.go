@@ -169,45 +169,6 @@ func (ctx *ValidationContext) findReferences(el *etree.Element, key *types.KeyIn
 	return sig.SignedInfo.References, nil
 }
 
-// Validate the ISO 20022 Business Application Header
-/*
-func (ctx *ValidationContext) BahValidate(el *etree.Element) (*etree.Element, bool, error) {
-	trusted := false
-
-	// Make a copy of the element to avoid mutating the one we were passed.
-	org := el.Copy()
-
-	sig, err := ctx.findSignature(org)
-	if err != nil {
-		return nil, false, err
-	}
-
-	cert, err := ctx.verifyCertificate(sig)
-	if err != nil {
-		cert, err = ctx.verifyUntrustedCertificate(sig)
-		if err != nil {
-			return nil, false, err
-		}
-	} else {
-		trusted = true
-	}
-
-	refs, err := ctx.findReferences(org, sig.KeyInfo)
-	if err != nil {
-		return nil, false, err
-	}
-
-	elm, err := ctx.validateBahSignature(&BahValidateInfo{
-		El:        el,
-		Signature: sig,
-		NewRefs:   refs,
-		Cert:      cert,
-	})
-
-	return elm, trusted, err
-}
-*/
-
 func (ctx *ValidationContext) BahValidate(el *etree.Element) (*etree.Element, bool, error) {
 
 	trusted := false
