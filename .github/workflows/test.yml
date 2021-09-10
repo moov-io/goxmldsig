@@ -1,5 +1,7 @@
+on: [push, pull_request]
+name: Test
 jobs:
-  build:
+  test:
     name: Test Go ${{ matrix.go }}
     runs-on: ubuntu-20.04
     strategy:
@@ -11,4 +13,5 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - run: go test ./...
+      - name: Test
+        run: go test ./...
