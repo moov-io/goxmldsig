@@ -2,6 +2,7 @@ package dsig
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/beevik/etree"
 	"github.com/russellhaering/goxmldsig/etreeutils"
@@ -174,5 +175,17 @@ func canonicalSerialize(el *etree.Element) ([]byte, error) {
 		CanonicalText:    true,
 	}
 
-	return doc.WriteToBytes()
+	str, err := doc.WriteToString()
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(ConvertXmlString(str)), nil
+}
+
+func ConvertXmlString(str string) string {
+	str = strings.ReplaceAll(str, "&lt;", "<")
+	str = strings.ReplaceAll(str, "&gt;", ">")
+	str = strings.ReplaceAll(str, "&quot;", "\"")
+	return str
 }
