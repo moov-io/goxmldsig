@@ -180,7 +180,16 @@ func canonicalSerialize(el *etree.Element) ([]byte, error) {
 		return nil, err
 	}
 
-	return []byte(ConvertXmlString(str)), nil
+	return []byte(stripCdataString(str)), nil
+}
+
+func stripCdataString(str string) string {
+	str = strings.ReplaceAll(str, "&lt;", "<")
+	str = strings.ReplaceAll(str, "&gt;", ">")
+	str = strings.ReplaceAll(str, "&quot;", "\"")
+	str = strings.ReplaceAll(str, "<![CDATA[", "")
+	str = strings.ReplaceAll(str, "]]>", "")
+	return str
 }
 
 func ConvertXmlString(str string) string {
