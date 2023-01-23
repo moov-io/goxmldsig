@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"github.com/beevik/etree"
-	"github.com/russellhaering/goxmldsig/types"
+	"github.com/moov-io/goxmldsig/types"
 )
 
 type BahValidateInfo struct {

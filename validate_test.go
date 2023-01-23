@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/beevik/etree"
-	"github.com/russellhaering/goxmldsig/etreeutils"
+	"github.com/moov-io/goxmldsig/etreeutils"
 	"github.com/stretchr/testify/require"
 )
 

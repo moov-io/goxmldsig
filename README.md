@@ -1,7 +1,7 @@
 # goxmldsig
 
-![Build Status](https://github.com/russellhaering/goxmldsig/actions/workflows/test.yml/badge.svg?branch=main)
-[![GoDoc](https://godoc.org/github.com/russellhaering/goxmldsig?status.svg)](https://godoc.org/github.com/russellhaering/goxmldsig)
+![Build Status](https://github.com/moov-io/goxmldsig/actions/workflows/test.yml/badge.svg?branch=main)
+[![GoDoc](https://godoc.org/github.com/moov-io/goxmldsig?status.svg)](https://godoc.org/github.com/moov-io/goxmldsig)
 
 XML Digital Signatures implemented in pure Go.
 
@@ -10,7 +10,7 @@ XML Digital Signatures implemented in pure Go.
 Install `goxmldsig` using `go get`:
 
 ```
-$ go get github.com/russellhaering/goxmldsig
+$ go get github.com/moov-io/goxmldsig
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ package main
 
 import (
     "github.com/beevik/etree"
-    "github.com/russellhaering/goxmldsig"
+    "github.com/moov-io/goxmldsig"
 )
 
 func main() {
@@ -84,7 +84,7 @@ func validate(root *x509.Certificate, el *etree.Element) {
 
 ## Limitations
 
-This library was created in order to [implement SAML 2.0](https://github.com/russellhaering/gosaml2)
+This library was created in order to [implement SAML 2.0](https://github.com/moov-io/gosaml2)
 without needing to execute a command line tool to create and validate signatures. It currently
 only implements the subset of relevant standards needed to support that implementation, but
 I hope to make it more complete over time. Contributions are welcome.
