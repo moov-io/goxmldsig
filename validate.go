@@ -279,10 +279,10 @@ func (ctx *ValidationContext) validateSignature(el *etree.Element, sig *types.Si
 	}
 
 	if !bytes.Equal(digest, decodedDigestValue) {
-		return nil, errors.New("Signature could not be verified")
+		return nil, errors.New("Signature values do not match")
 	}
 	if sig.SignatureValue == nil {
-		return nil, errors.New("Signature could not be verified")
+		return nil, errors.New("could not verify - missing signature")
 	}
 
 	// Decode the 'SignatureValue' so we can compare against it
